@@ -144,7 +144,8 @@ class Pipe(object):
         return create_default_optimizer(self.model.ops,
                                         **self.cfg.get('optimizer', {}))
 
-    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None):
+    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None,
+            **cfg):
         """Initialize the pipe for training, using data exampes if available.
         If no model has been initialized yet, the model is added."""
         if self.model is True:
@@ -344,7 +345,8 @@ class Tensorizer(Pipe):
         loss = (d_scores**2).sum()
         return loss, d_scores
 
-    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None):
+    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None,
+            **cfg):
         """Allocate models, pre-process training data and acquire an
         optimizer.
 
@@ -467,7 +469,8 @@ class Tagger(Pipe):
         d_scores = self.model.ops.unflatten(d_scores, [len(d) for d in docs])
         return float(loss), d_scores
 
-    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None):
+    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None,
+            **cfg):
         orig_tag_map = dict(self.vocab.morphology.tag_map)
         new_tag_map = OrderedDict()
         for raw_text, annots_brackets in gold_tuples:
@@ -641,7 +644,7 @@ class MultitaskObjective(Tagger):
         pass
 
     def begin_training(self, gold_tuples=tuple(), pipeline=None, tok2vec=None,
-                       sgd=None):
+                       sgd=None, **cfg):
         gold_tuples = nonproj.preprocess_training_data(gold_tuples)
         for raw_text, annots_brackets in gold_tuples:
             for annots, brackets in annots_brackets:
@@ -766,7 +769,7 @@ class SimilarityHook(Pipe):
     def update(self, doc1_doc2, golds, sgd=None, drop=0.):
         sims, bp_sims = self.model.begin_update(doc1_doc2, drop=drop)
 
-    def begin_training(self, _=tuple(), pipeline=None, sgd=None):
+    def begin_training(self, _=tuple(), pipeline=None, sgd=None, **cfg):
         """Allocate model, using width from tensorizer in pipeline.
 
         gold_tuples (iterable): Gold-standard training data.
@@ -859,7 +862,8 @@ class TextCategorizer(Pipe):
         self.labels.append(label)
         return 1
 
-    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None):
+    def begin_training(self, gold_tuples=tuple(), pipeline=None, sgd=None,
+            **cfg):
         if pipeline and getattr(pipeline[0], 'name', None) == 'tensorizer':
             token_vector_width = pipeline[0].model.nO
         else:
