@@ -30,7 +30,7 @@ def test_simple_textcat():
     nlp.get_pipe('textcat').add_label('answer')
     try:
         nlp.begin_training(**cfg)
-        assert False  # this should not error out
+        assert True  # this should not error out
     except TypeError as e:
         print(e)
         assert False
