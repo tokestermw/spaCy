@@ -15,5 +15,22 @@ def test_simple_ner():
     try:
         nlp.begin_training(**cfg)
         assert False  # should error out
-    except ValueError:
+    except ValueError as e:
+        print(e)
         assert True
+
+
+def test_simple_textcat():
+    cfg = {
+        'low_data': True,
+    }
+
+    nlp = Language()
+    nlp.add_pipe(nlp.create_pipe('textcat'))
+    nlp.get_pipe('textcat').add_label('answer')
+    try:
+        nlp.begin_training(**cfg)
+        assert False  # this should not error out
+    except TypeError as e:
+        print(e)
+        assert False
